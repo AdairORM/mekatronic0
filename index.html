@@ -1,0 +1,528 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Calculadora de Calibre de Cables Eléctricos (NOM-001-SEDE)</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        body {
+            font-family: 'Inter', sans-serif;
+        }
+        /* Estilos adicionales si son necesarios */
+        .tooltip {
+            position: relative;
+            display: inline-block;
+            cursor: pointer;
+        }
+        .tooltip .tooltiptext {
+            visibility: hidden;
+            width: 220px;
+            background-color: #555;
+            color: #fff;
+            text-align: center;
+            border-radius: 6px;
+            padding: 5px 10px;
+            position: absolute;
+            z-index: 1;
+            bottom: 125%; /* Position above the element */
+            left: 50%;
+            margin-left: -110px; /* Center the tooltip */
+            opacity: 0;
+            transition: opacity 0.3s;
+            font-size: 0.8rem;
+            font-weight: normal;
+        }
+        .tooltip:hover .tooltiptext {
+            visibility: visible;
+            opacity: 1;
+        }
+        /* Estilo para mensajes de error */
+        .error-message {
+            color: #dc2626; /* red-600 */
+            font-size: 0.875rem; /* text-sm */
+            margin-top: 0.25rem; /* mt-1 */
+        }
+         /* Estilo para resaltar resultados */
+        .result-value {
+            font-weight: 600; /* semibold */
+            color: #16a34a; /* green-600 */
+        }
+    </style>
+</head>
+<body class="bg-gray-100 p-4 md:p-8">
+    <div class="max-w-4xl mx-auto bg-white rounded-lg shadow-lg p-6 md:p-10">
+
+        <header class="mb-8 text-center">
+            <h1 class="text-2xl md:text-3xl font-bold text-gray-800">Calculadora de Calibre de Cables Eléctricos</h1>
+            <p class="text-gray-600 mt-1">Basada en NOM-001-SEDE-2012 (México)</p>
+        </header>
+
+        <form id="calculator-form" class="grid grid-cols-1 md:grid-cols-2 gap-6 md:gap-8">
+
+            <div class="space-y-4 p-4 border border-gray-200 rounded-md bg-gray-50">
+                <h2 class="text-lg font-semibold text-gray-700 border-b pb-2 mb-4">1. Datos de Carga y Circuito</h2>
+
+                <div>
+                    <label for="current" class="block text-sm font-medium text-gray-700">Corriente de Carga (Amperes)</label>
+                    <input type="number" id="current" name="current" step="0.01" required class="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm" placeholder="Ej: 25.5">
+                    <div id="error-current" class="error-message"></div>
+                </div>
+
+                <div>
+                    <label for="voltage" class="block text-sm font-medium text-gray-700">Tensión del Sistema (Volts)</label>
+                    <select id="voltage" name="voltage" required class="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm">
+                        <option value="127">127 V (Monofásico)</option>
+                        <option value="220">220 V (Monofásico / Bifásico)</option>
+                        <option value="440">440 V (Trifásico)</option>
+                        <option value="480">480 V (Trifásico)</option>
+                    </select>
+                     <div id="error-voltage" class="error-message"></div>
+                </div>
+
+                <div>
+                    <label for="phases" class="block text-sm font-medium text-gray-700">Número de Fases</label>
+                    <select id="phases" name="phases" required class="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm">
+                        <option value="1">Monofásico (2 hilos)</option>
+                        <option value="2">Bifásico (3 hilos)</option> <option value="3">Trifásico (3 o 4 hilos)</option>
+                    </select>
+                     <div id="error-phases" class="error-message"></div>
+                </div>
+
+                 <div>
+                    <label for="length" class="block text-sm font-medium text-gray-700">Longitud del Circuito (Metros)</label>
+                    <input type="number" id="length" name="length" step="0.1" required class="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm" placeholder="Ej: 55">
+                     <div id="error-length" class="error-message"></div>
+                </div>
+
+                <div>
+                    <label for="voltageDrop" class="block text-sm font-medium text-gray-700">Caída de Tensión Máxima Permitida (%)</label>
+                     <div class="tooltip inline-block">
+                         <span class="text-xs text-gray-400 ml-1">(?)</span>
+                        <span class="tooltiptext">NOM sugiere máx. 3% para circuitos derivados y 5% total (alimentador + derivado).</span>
+                    </div>
+                    <input type="number" id="voltageDrop" name="voltageDrop" step="0.1" value="3.0" required class="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm" placeholder="Ej: 3">
+                     <div id="error-voltageDrop" class="error-message"></div>
+                </div>
+            </div>
+
+            <div class="space-y-4 p-4 border border-gray-200 rounded-md bg-gray-50">
+                 <h2 class="text-lg font-semibold text-gray-700 border-b pb-2 mb-4">2. Condiciones de Instalación</h2>
+
+                <div>
+                    <label for="material" class="block text-sm font-medium text-gray-700">Material del Conductor</label>
+                    <select id="material" name="material" required class="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm">
+                        <option value="copper">Cobre (Cu)</option>
+                        <option value="aluminum">Aluminio (Al)</option>
+                    </select>
+                     <div id="error-material" class="error-message"></div>
+                </div>
+
+                <div>
+                    <label for="insulation" class="block text-sm font-medium text-gray-700">Tipo de Aislamiento</label>
+                     <div class="tooltip inline-block">
+                         <span class="text-xs text-gray-400 ml-1">(?)</span>
+                        <span class="tooltiptext">Define la temperatura máxima y la tabla de ampacidad base (NOM Tabla 310-15(b)(16) aprox).</span>
+                    </div>
+                    <select id="insulation" name="insulation" required class="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm">
+                        <option value="THW-LS_75">THW-LS / THHW (75°C)</option>
+                        <option value="THHN_90">THHN / THWN-2 (90°C)</option>
+                        </select>
+                     <div id="error-insulation" class="error-message"></div>
+                </div>
+
+                 <div>
+                    <label for="temperature" class="block text-sm font-medium text-gray-700">Temperatura Ambiente (°C)</label>
+                    <div class="tooltip inline-block">
+                         <span class="text-xs text-gray-400 ml-1">(?)</span>
+                        <span class="tooltiptext">Temperatura del aire alrededor del conductor. Afecta la ampacidad (NOM Tabla 310-15(b)(2)(a)).</span>
+                    </div>
+                    <input type="number" id="temperature" name="temperature" value="30" required class="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm" placeholder="Ej: 35">
+                     <div id="error-temperature" class="error-message"></div>
+                </div>
+
+                <div>
+                    <label for="conductors" class="block text-sm font-medium text-gray-700">Conductores Portadores de Corriente en Canalización</label>
+                     <div class="tooltip inline-block">
+                         <span class="text-xs text-gray-400 ml-1">(?)</span>
+                        <span class="tooltiptext">Número de cables que llevan corriente en el mismo tubo/charola. Afecta por agrupamiento (NOM Tabla 310-15(b)(3)(a)).</span>
+                    </div>
+                    <input type="number" id="conductors" name="conductors" value="3" min="1" step="1" required class="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm" placeholder="Ej: 3">
+                     <div id="error-conductors" class="error-message"></div>
+                </div>
+
+                 <div>
+                    <label for="installation" class="block text-sm font-medium text-gray-700">Método de Instalación (Simplificado)</label>
+                    <select id="installation" name="installation" required class="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm">
+                        <option value="conduit">En Tubería Conduit (o Charola)</option>
+                        </select>
+                    <div id="error-installation" class="error-message"></div>
+                 </div>
+
+            </div>
+
+            <div class="md:col-span-2 flex justify-center mt-6">
+                <button type="submit" class="px-8 py-3 bg-indigo-600 text-white font-semibold rounded-md shadow-md hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 transition duration-150 ease-in-out">
+                    Calcular Calibre
+                </button>
+            </div>
+        </form>
+
+        <div id="results-section" class="mt-10 p-6 border border-green-200 rounded-md bg-green-50 hidden">
+            <h2 class="text-xl font-semibold text-green-800 border-b border-green-300 pb-2 mb-4">Resultados del Cálculo</h2>
+            <div class="space-y-3 text-gray-700">
+                <p>Calibre Mínimo Recomendado (AWG): <span id="result-gauge" class="result-value">--</span></p>
+                <p>Limitado por: <span id="result-limiting-factor" class="font-medium text-gray-600">--</span></p>
+                <p>Ampacidad Corregida del Calibre Seleccionado: <span id="result-ampacity" class="result-value">--</span> A</p>
+                <p>Caída de Tensión Calculada: <span id="result-voltage-drop-percent" class="result-value">--</span> % (<span id="result-voltage-drop-volts" class="result-value">--</span> V)</p>
+            </div>
+             <p id="result-warning" class="mt-4 text-sm text-yellow-700 bg-yellow-100 p-2 rounded"></p>
+        </div>
+
+         <div id="general-error-section" class="mt-10 p-4 border border-red-300 rounded-md bg-red-50 text-red-700 hidden">
+            <h2 class="text-lg font-semibold mb-2">Error en el Cálculo</h2>
+            <p id="general-error-message">Por favor, revisa los datos ingresados.</p>
+        </div>
+
+
+        <div class="mt-10 pt-6 border-t border-gray-300 text-xs text-gray-500">
+            <h3 class="font-semibold text-sm text-gray-600 mb-2">Importante (Descargo de Responsabilidad):</h3>
+            <p>Esta calculadora se basa en interpretaciones de tablas y fórmulas de la NOM-001-SEDE-2012. Los resultados son únicamente orientativos y para fines educativos o de predimensionamiento.</p>
+            <p class="mt-1">No sustituye el cálculo detallado realizado por un ingeniero eléctrico calificado ni la consulta directa de la Norma Oficial Mexicana vigente. El usuario asume toda la responsabilidad por el uso de la información proporcionada.</p>
+            <p class="mt-1">Factores como la impedancia (reactancia), armónicos, condiciones exactas de instalación y futuras actualizaciones de la norma pueden afectar el cálculo real.</p>
+             <p class="mt-2">Versión de Datos: NOM-001-SEDE-2012 (Tablas y factores seleccionados).</p>
+        </div>
+
+         <div class="mt-8 p-4 border border-dashed border-gray-300 rounded-md text-center text-gray-500 hidden">
+             <p>✨ Próximamente: Funciones Premium ✨</p>
+             <p class="text-sm">Guardar proyectos, generar reportes PDF, más tipos de aislamiento y métodos de instalación.</p>
+         </div>
+
+    </div>
+
+    <script>
+        // --- NOM Data (Simplified & Representative - BASED ON NOM-001-SEDE-2012) ---
+        // WARNING: This data is illustrative. Real application requires comprehensive and verified NOM data.
+
+        // Ampacity (Amperes) based on Table 310.15(B)(16) approx. (Conduit/Raceway, up to 3 conductors, 30°C ambient)
+        const ampacityTable = {
+            'copper': {
+                'THW-LS_75': { '14': 20, '12': 25, '10': 35, '8': 50, '6': 65, '4': 85, '3': 100, '2': 115, '1': 130, '1/0': 150, '2/0': 175, '3/0': 200, '4/0': 230 },
+                'THHN_90':   { '14': 25, '12': 30, '10': 40, '8': 55, '6': 75, '4': 95, '3': 110, '2': 130, '1': 150, '1/0': 170, '2/0': 195, '3/0': 225, '4/0': 260 }
+            },
+            'aluminum': {
+                 // Using 84% rule approx or specific table values if available
+                'THW-LS_75': { '12': 20, '10': 25, '8': 40, '6': 50, '4': 65, '3': 75, '2': 90, '1': 100, '1/0': 120, '2/0': 135, '3/0': 155, '4/0': 180 },
+                'THHN_90':   { '12': 25, '10': 30, '8': 45, '6': 60, '4': 75, '3': 85, '2': 100, '1': 115, '1/0': 135, '2/0': 150, '3/0': 175, '4/0': 205 }
+            }
+            // NOTE: Aluminum starts typically at #12 AWG for power circuits per NOM.
+        };
+
+        // Ambient Temperature Correction Factors (Based on 30°C Ambient - Table 310.15(B)(2)(a))
+        const tempCorrectionFactors = {
+            'THW-LS_75': { 21: 1.08, 26: 1.04, 31: 0.96, 36: 0.91, 41: 0.87, 46: 0.82, 51: 0.76, 56: 0.71 }, // Approx values centered around ranges
+            'THHN_90':   { 21: 1.05, 26: 1.04, 31: 0.96, 36: 0.94, 41: 0.91, 46: 0.88, 51: 0.85, 56: 0.82 }  // Approx values centered around ranges
+        };
+         // Adjustment Factors for More Than 3 Current-Carrying Conductors (Table 310.15(B)(3)(a))
+        const groupingFactors = {
+            3: 1.0, // Base case (already factored into base ampacity tables like 310.15(b)(16))
+            6: 0.8,
+            9: 0.7,
+            24: 0.6, // Example ranges
+            42: 0.5
+            // Add more ranges as needed
+        };
+
+        // Resistance (Ohms per km) - Based on NOM Chapter 9, Table 8 (DC) / Table 9 (AC) approx.
+        // Using AC resistance for uncoated copper / aluminum at 75°C in steel conduit (example)
+        const resistanceOhmsPerKm = {
+            'copper':   { '14': 10.6, '12': 6.69, '10': 4.2, '8': 2.62, '6': 1.64, '4': 1.05, '3': 0.827, '2': 0.656, '1': 0.525, '1/0': 0.413, '2/0': 0.331, '3/0': 0.262, '4/0': 0.207 },
+            'aluminum': { '12': 11.0, '10': 6.92, '8': 4.33, '6': 2.72, '4': 1.74, '3': 1.36, '2': 1.08, '1': 0.853, '1/0': 0.676, '2/0': 0.535, '3/0': 0.427, '4/0': 0.338 }
+        };
+
+        // Available AWG Sizes (ordered smallest to largest)
+        const awgSizes = ['14', '12', '10', '8', '6', '4', '3', '2', '1', '1/0', '2/0', '3/0', '4/0'];
+        const awgSizesAluminum = ['12', '10', '8', '6', '4', '3', '2', '1', '1/0', '2/0', '3/0', '4/0']; // Aluminum typically starts at #12
+
+        // --- Helper Functions ---
+
+        function getSafeValue(elementId, isNumeric = true) {
+            const element = document.getElementById(elementId);
+            const value = element ? element.value : null;
+            if (value === null || value.trim() === '') return null;
+            if (isNumeric) {
+                const num = Number(value);
+                return isNaN(num) ? null : num;
+            }
+            return value;
+        }
+
+         function validateInputs(inputs) {
+            let isValid = true;
+            clearErrors();
+
+            // Basic validation rules (add more as needed)
+            if (inputs.current === null || inputs.current <= 0) {
+                showError('error-current', 'Ingrese una corriente válida mayor a 0.');
+                isValid = false;
+            }
+             if (inputs.voltage === null) {
+                showError('error-voltage', 'Seleccione una tensión.');
+                isValid = false;
+            }
+             if (inputs.phases === null) {
+                 showError('error-phases', 'Seleccione el número de fases.');
+                 isValid = false;
+             }
+            if (inputs.length === null || inputs.length <= 0) {
+                showError('error-length', 'Ingrese una longitud válida mayor a 0.');
+                isValid = false;
+            }
+            if (inputs.voltageDrop === null || inputs.voltageDrop <= 0 || inputs.voltageDrop > 15) { // Practical limit
+                showError('error-voltageDrop', 'Ingrese una caída de tensión válida (ej. 1-15%).');
+                isValid = false;
+            }
+             if (!inputs.material) {
+                 showError('error-material', 'Seleccione un material.');
+                 isValid = false;
+             }
+             if (!inputs.insulation) {
+                 showError('error-insulation', 'Seleccione un tipo de aislamiento.');
+                 isValid = false;
+             }
+            if (inputs.temperature === null) {
+                showError('error-temperature', 'Ingrese una temperatura ambiente.');
+                isValid = false;
+            }
+            if (inputs.conductors === null || inputs.conductors < 1) {
+                showError('error-conductors', 'Ingrese un número válido de conductores (mínimo 1).');
+                isValid = false;
+            }
+             if (!inputs.installation) {
+                 showError('error-installation', 'Seleccione un método de instalación.');
+                 isValid = false;
+             }
+
+            // Specific check for Aluminum starting size
+            if (inputs.material === 'aluminum' && !awgSizesAluminum.includes('14') && inputs.current > 0) {
+                 // Check if calculation might require size 14 AWG which is not typical for Aluminum power circuits
+                 // This logic might need refinement based on how minimum size is determined
+            }
+
+
+            return isValid;
+        }
+
+        function showError(elementId, message) {
+            const errorDiv = document.getElementById(elementId);
+            if (errorDiv) {
+                errorDiv.textContent = message;
+                // Optional: Add error styling to the input field itself
+                 const inputField = document.getElementById(elementId.replace('error-', ''));
+                 if (inputField) inputField.classList.add('border-red-500');
+            }
+        }
+
+        function clearErrors() {
+            const errorMessages = document.querySelectorAll('.error-message');
+            errorMessages.forEach(el => el.textContent = '');
+             const inputFields = document.querySelectorAll('input, select');
+             inputFields.forEach(el => el.classList.remove('border-red-500'));
+
+            document.getElementById('results-section').classList.add('hidden');
+            document.getElementById('general-error-section').classList.add('hidden');
+            document.getElementById('result-warning').textContent = '';
+             document.getElementById('result-warning').classList.add('hidden');
+        }
+
+
+        function getTempCorrectionFactor(insulation, ambientTemp) {
+            const factors = tempCorrectionFactors[insulation];
+            if (!factors) return 1.0; // Default if insulation not found
+
+            // Find the closest lower bound temperature key
+            let applicableTemp = 0;
+            for (const tempKey in factors) {
+                if (ambientTemp >= parseInt(tempKey)) {
+                    applicableTemp = Math.max(applicableTemp, parseInt(tempKey));
+                }
+            }
+             // If ambient temp is below the lowest key, use the factor for the lowest key (or 1.0 if very low)
+             if (applicableTemp === 0) {
+                 const lowestKey = Math.min(...Object.keys(factors).map(k => parseInt(k)));
+                 return ambientTemp < lowestKey ? 1.08 : factors[lowestKey]; // Example adjustment for very low temps
+             }
+
+            return factors[applicableTemp] || 1.0; // Return factor or default 1.0
+        }
+
+        function getGroupingFactor(numConductors) {
+            if (numConductors <= 3) return 1.0;
+            if (numConductors <= 6) return groupingFactors[6];
+            if (numConductors <= 9) return groupingFactors[9];
+             if (numConductors <= 24) return groupingFactors[24];
+             if (numConductors <= 42) return groupingFactors[42];
+            return groupingFactors[42]; // Default to lowest factor for > 42
+        }
+
+        function getResistance(material, gauge) {
+            return resistanceOhmsPerKm[material]?.[gauge] || null;
+        }
+
+        function getBaseAmpacity(material, insulation, gauge) {
+             // Basic check: Aluminum usually doesn't use AWG 14 for power
+             if (material === 'aluminum' && gauge === '14') return null;
+            return ampacityTable[material]?.[insulation]?.[gauge] || null;
+        }
+
+
+        // --- Main Calculation Logic ---
+
+        function calculateGauge(event) {
+            event.preventDefault(); // Prevent form submission
+            clearErrors();
+
+            // 1. Get Inputs
+            const inputs = {
+                current: getSafeValue('current'),
+                voltage: getSafeValue('voltage'),
+                phases: parseInt(getSafeValue('phases', false)), // Get as string then parse
+                length: getSafeValue('length'),
+                voltageDrop: getSafeValue('voltageDrop'),
+                material: getSafeValue('material', false),
+                insulation: getSafeValue('insulation', false),
+                temperature: getSafeValue('temperature'),
+                conductors: getSafeValue('conductors'),
+                installation: getSafeValue('installation', false) // Currently simplified
+            };
+
+            // 2. Validate Inputs
+            if (!validateInputs(inputs)) {
+                 document.getElementById('general-error-section').classList.remove('hidden');
+                 document.getElementById('general-error-message').textContent = 'Uno o más campos tienen errores. Por favor, corríjalos.';
+                return;
+            }
+
+             // Determine available sizes based on material
+             const availableSizes = inputs.material === 'aluminum' ? awgSizesAluminum : awgSizes;
+
+
+            // 3. Find Minimum Gauge based on Adjusted Ampacity
+            let gaugeByAmpacity = null;
+            let finalAdjustedAmpacity = null; // Store the ampacity of the chosen gauge
+
+            const tempFactor = getTempCorrectionFactor(inputs.insulation, inputs.temperature);
+            const groupFactor = getGroupingFactor(inputs.conductors);
+
+            for (const gauge of availableSizes) {
+                const baseAmpacity = getBaseAmpacity(inputs.material, inputs.insulation, gauge);
+                if (baseAmpacity === null) continue; // Skip if no data for this combo
+
+                const adjustedAmpacity = baseAmpacity * tempFactor * groupFactor;
+
+                if (adjustedAmpacity >= inputs.current) {
+                    gaugeByAmpacity = gauge;
+                    finalAdjustedAmpacity = adjustedAmpacity; // Store the ampacity of this gauge
+                    break; // Found the smallest gauge that meets the current requirement
+                }
+            }
+
+            if (gaugeByAmpacity === null) {
+                showError('general-error-message', 'No se encontró un calibre adecuado para la corriente especificada con los factores de corrección aplicados. Verifique los datos o considere un calibre mayor no listado.');
+                 document.getElementById('general-error-section').classList.remove('hidden');
+                return;
+            }
+
+            // 4. Find Minimum Gauge based on Voltage Drop (starting from the gauge found by ampacity)
+            let gaugeByVoltageDrop = null;
+            let calculatedVDPercent = null;
+            let calculatedVDVolts = null;
+
+            const startIndex = availableSizes.indexOf(gaugeByAmpacity);
+            if (startIndex === -1) {
+                 showError('general-error-message', 'Error interno: Calibre por ampacidad no encontrado en la lista de tamaños.');
+                 document.getElementById('general-error-section').classList.remove('hidden');
+                 return; // Should not happen if gaugeByAmpacity is valid
+            }
+
+            for (let i = startIndex; i < availableSizes.length; i++) {
+                const currentGauge = availableSizes[i];
+                const resistance = getResistance(inputs.material, currentGauge);
+
+                if (resistance === null) continue; // Skip if no resistance data
+
+                let vdVolts;
+                const R_ohm_per_m = resistance / 1000; // Convert ohm/km to ohm/m
+
+                // Voltage Drop Calculation (Simplified - neglects reactance for smaller cables/lower frequencies)
+                // Formula: VD = K * L * I * R / V (where K=2 for 1ph, K=sqrt(3) for 3ph) - Approximation
+                // More standard: VD_Volts = Factor * L * I * R_ohm_per_m
+                 const Factor = inputs.phases === 3 ? Math.sqrt(3) : 2; // sqrt(3) for 3-phase, 2 for 1-phase/2-phase approx.
+
+                 vdVolts = Factor * inputs.length * inputs.current * R_ohm_per_m;
+
+
+                const vdPercent = (vdVolts / inputs.voltage) * 100;
+
+                if (vdPercent <= inputs.voltageDrop) {
+                    gaugeByVoltageDrop = currentGauge;
+                    calculatedVDPercent = vdPercent;
+                    calculatedVDVolts = vdVolts;
+                    break; // Found the smallest gauge (from ampacity requirement onwards) that meets VD
+                }
+            }
+
+             if (gaugeByVoltageDrop === null) {
+                 showError('general-error-message', `No se encontró un calibre que cumpla con la caída de tensión máxima del ${inputs.voltageDrop}% (incluso con el calibre más grande listado). Verifique la longitud, corriente o considere aumentar la caída de tensión permitida si la norma lo permite.`);
+                 document.getElementById('general-error-section').classList.remove('hidden');
+                return;
+             }
+
+            // 5. Determine Final Recommended Gauge
+            const gaugeAmpacityIndex = availableSizes.indexOf(gaugeByAmpacity);
+            const gaugeVDIndex = availableSizes.indexOf(gaugeByVoltageDrop);
+
+            const finalGauge = availableSizes[Math.max(gaugeAmpacityIndex, gaugeVDIndex)];
+            const limitingFactor = gaugeVDIndex > gaugeAmpacityIndex ? "Caída de Tensión" : "Ampacidad";
+
+            // Recalculate final ampacity and VD for the *chosen* final gauge
+             const finalResistance = getResistance(inputs.material, finalGauge);
+             const finalBaseAmpacity = getBaseAmpacity(inputs.material, inputs.insulation, finalGauge);
+             const finalFactor = inputs.phases === 3 ? Math.sqrt(3) : 2;
+             const finalVDVolts = finalResistance ? finalFactor * inputs.length * inputs.current * (finalResistance / 1000) : 0;
+             const finalVDPercent = finalResistance ? (finalVDVolts / inputs.voltage) * 100 : 0;
+             const finalAmpacityCorrected = finalBaseAmpacity ? finalBaseAmpacity * tempFactor * groupFactor : 0;
+
+
+            // 6. Display Results
+            document.getElementById('result-gauge').textContent = finalGauge;
+            document.getElementById('result-limiting-factor').textContent = limitingFactor;
+             document.getElementById('result-ampacity').textContent = finalAmpacityCorrected.toFixed(2);
+             document.getElementById('result-voltage-drop-percent').textContent = finalVDPercent.toFixed(2);
+             document.getElementById('result-voltage-drop-volts').textContent = finalVDVolts.toFixed(2);
+
+             // Add warning if selected gauge's ampacity is very close to load current
+             const safetyMargin = 1.05; // Example: 5% margin
+             if (finalAmpacityCorrected < inputs.current * safetyMargin && limitingFactor === "Ampacidad") {
+                  document.getElementById('result-warning').textContent = 'Advertencia: La ampacidad corregida del calibre seleccionado está muy cerca de la corriente de carga. Considere factores adicionales o el siguiente calibre superior si hay incertidumbre.';
+                  document.getElementById('result-warning').classList.remove('hidden');
+             } else {
+                  document.getElementById('result-warning').classList.add('hidden');
+             }
+
+
+            document.getElementById('results-section').classList.remove('hidden');
+            document.getElementById('general-error-section').classList.add('hidden'); // Hide general error if calculation succeeds
+        }
+
+        // Attach event listener to form
+        const form = document.getElementById('calculator-form');
+        form.addEventListener('submit', calculateGauge);
+
+    </script>
+
+</body>
+</html>
